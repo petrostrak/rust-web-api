@@ -20,3 +20,7 @@ To execute migrations via docker compose:
 ```bash
 docker compose exec app diesel migration run
 ```
+To run the application:
+```bash
+docker compose exec app cargo run
+```
