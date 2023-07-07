@@ -8,3 +8,15 @@ An advanced Rocket REST API written in Rust that
 *  sends HTML emails with lettre and tera
 *  implements session handling and granular access management for different endpoints
 
+Setup migrations via docker compose:
+```bash
+docker compose exec app diesel setup
+```
+Generate migrations via docker compose:
+```bash
+docker compose exec app diesel migration generate <table_name>
+```
+To execute migrations via docker compose:
+```bash
+docker compose exec app diesel migration run
+```
