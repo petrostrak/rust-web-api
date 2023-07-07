@@ -2,37 +2,37 @@ use crate::schema::*;
 use chrono::NaiveDateTime;
 
 #[derive(Queryable)]
-struct Rustacean {
-    id: i32,
-    name: String,
-    email: String,
-    created_at: NaiveDateTime,
+pub struct Rustacean {
+    pub id: i32,
+    pub name: String,
+    pub email: String,
+    pub created_at: NaiveDateTime,
 }
 
 #[derive(Insertable)]
 #[diesel(table_name = rustaceans)]
-struct NewRustacean {
-    name: String,
-    email: String,
+pub struct NewRustacean {
+    pub name: String,
+    pub email: String,
 }
 
 #[derive(Queryable)]
-struct Crate {
-    id: i32,
-    rustacean_id: i32,
-    code: String,
-    name: String,
-    version: String,
-    description: Option<String>,
-    created_at: NaiveDateTime,
+pub struct Crate {
+    pub id: i32,
+    pub rustacean_id: i32,
+    pub code: String,
+    pub name: String,
+    pub version: String,
+    pub description: Option<String>,
+    pub created_at: NaiveDateTime,
 }
 
 #[derive(Insertable)]
 #[diesel(table_name = crates)]
-struct NewCrate {
-    rustacean_id: i32,
-    code: String,
-    name: String,
-    version: String,
-    description: Option<String>,
+pub struct NewCrate {
+    pub rustacean_id: i32,
+    pub code: String,
+    pub name: String,
+    pub version: String,
+    pub description: Option<String>,
 }
