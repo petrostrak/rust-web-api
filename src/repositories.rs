@@ -37,3 +37,41 @@ impl RustaceanRepository {
         diesel::delete(rustaceans::table.find(id)).execute(conn)
     }
 }
+
+pub struct CrateRepository;
+
+impl CrateRepository {
+    pub fn get_all(conn: &mut PgConnection, limit: i64) -> QueryResult<Vec<Crate>> {
+        crates::table
+            .limit(limit)
+            .order(crates::id.desc())
+            .load::<Crate>(conn)
+    }
+
+    pub fn get_by_id(conn: &mut PgConnection, id: i32) -> QueryResult<Crate> {
+        crates::table.find(id).get_result::<Crate>(conn)
+    }
+
+    pub fn create(conn: &mut PgConnection, data: NewCrate) -> QueryResult<Crate> {
+        diesel::insert_into(crates::table)
+            .values(data)
+            .get_result(conn)
+    }
+
+    pub fn update(conn: &mut PgConnection, id: i32, data: Crate) -> QueryResult<Crate> {
+        diesel::update(crates::table.find(id))
+            .set((
+                crates::rustacean_id.eq(data.rustacean_id.to_owned()),
+                crates::code.eq(data.code.to_owned()),
+                crates::name.eq(data.name.to_owned()),
+                crates::version.eq(data.version.to_owned()),
+                crates::description.eq(data.description.to_owned()),
+            ))
+            .execute(conn)?;
+        Self::get_by_id(conn, id)
+    }
+
+    pub fn delete(conn: &mut PgConnection, id: i32) -> QueryResult<usize> {
+        diesel::delete(crates::table.find(id)).execute(conn)
+    }
+}
