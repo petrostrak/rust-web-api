@@ -1,6 +1,9 @@
 use diesel::PgConnection;
 use rocket_sync_db_pools::database;
-use routes::rustaceans::*;
+use routes::{
+    crates::{create_crate, delete_crate, get_crate_by_id, get_crates, update_crate},
+    rustaceans::*,
+};
 
 #[macro_use]
 extern crate diesel;
@@ -25,7 +28,12 @@ async fn main() {
                 get_rustacean_by_id,
                 create_rustacean,
                 update_rustacean,
-                delete_rustacean
+                delete_rustacean,
+                get_crates,
+                get_crate_by_id,
+                create_crate,
+                update_crate,
+                delete_crate
             ],
         )
         .attach(DB::fairing())

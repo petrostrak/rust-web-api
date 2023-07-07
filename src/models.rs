@@ -28,7 +28,7 @@ pub struct Crate {
     pub created_at: NaiveDateTime,
 }
 
-#[derive(Insertable)]
+#[derive(Deserialize, Insertable)]
 #[diesel(table_name = crates)]
 pub struct NewCrate {
     pub rustacean_id: i32,
