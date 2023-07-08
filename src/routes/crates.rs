@@ -32,10 +32,13 @@ pub async fn get_crate_by_id(db: DB, id: i32) -> Result<Value, Custom<Value>> {
 }
 
 #[post("/crates", format = "json", data = "<new_crate>")]
-pub async fn create_crate(db: DB, new_crate: Json<NewCrate>) -> Result<Value, Custom<Value>> {
+pub async fn create_crate(
+    db: DB,
+    new_crate: Json<NewCrate>,
+) -> Result<Custom<Value>, Custom<Value>> {
     db.run(|c| {
         CrateRepository::create(c, new_crate.into_inner())
-            .map(|crt| json!(crt))
+            .map(|crt| Custom(Status::Created, json!(crt)))
             .map_err(|e| Custom(Status::NotFound, json!(e.to_string())))
     })
     .await

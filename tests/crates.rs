@@ -25,3 +25,25 @@ fn clean_test_crates(client: &Client, crt: Value) {
         .unwrap();
     assert_eq!(response.status(), StatusCode::NO_CONTENT);
 }
+
+#[test]
+fn test_get_crates() {
+    let client = Client::new();
+    let response = client.get("http://127.0.0.1:8000/crates").send().unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+
+    let crate_1 = create_test_crate(&client);
+    let crate_2 = create_test_crate(&client);
+
+    let response = client.get("http://127.0.0.1:8000/crates").send().unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+
+    let response_json = response.json::<Value>().unwrap();
+    assert!(response_json.as_array().unwrap().contains(&crate_1));
+    assert!(response_json.as_array().unwrap().contains(&crate_2));
+
+    clean_test_crates(&client, crate_1);
+    clean_test_crates(&client, crate_2);
+}
