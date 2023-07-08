@@ -57,7 +57,7 @@ pub async fn update_rustacean(
     .await
 }
 
-#[delete("/rustacean/<id>")]
+#[delete("/rustaceans/<id>")]
 pub async fn delete_rustacean(db: DB, id: i32) -> Result<NoContent, Custom<Value>> {
     db.run(move |c| {
         RustaceanRepository::delete(c, id)
