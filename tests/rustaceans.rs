@@ -15,6 +15,17 @@ fn create_test_rustacean(client: &Client) -> Value {
     response.json::<Value>().unwrap()
 }
 
+fn clean_test_rustacean(client: &Client, rustacean: Value) {
+    let response = client
+        .delete(format!(
+            "http://127.0.0.1:8000/rustaceans/{}",
+            rustacean["id"]
+        ))
+        .send()
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::NO_CONTENT)
+}
+
 #[test]
 fn test_get_rustaceans() {
     let client = Client::new();
@@ -36,31 +47,39 @@ fn test_get_rustaceans() {
     let response_json = response.json::<Value>().unwrap();
     assert!(response_json.as_array().unwrap().contains(&rustacean_1));
     assert!(response_json.as_array().unwrap().contains(&rustacean_2));
+
+    clean_test_rustacean(&client, rustacean_1);
+    clean_test_rustacean(&client, rustacean_2);
 }
 
 #[test]
 fn test_create_rustacean() {
     let client = Client::new();
 
-    let json = create_test_rustacean(&client);
+    let rustacean = create_test_rustacean(&client);
     assert_eq!(
-        json,
+        rustacean,
         json!({
-            "id": json["id"],
+            "id": rustacean["id"],
             "email":"pit.trak@gmail.com",
             "name": "petros trak",
-            "created_at": json["created_at"]
+            "created_at": rustacean["created_at"]
         })
     );
+
+    clean_test_rustacean(&client, rustacean);
 }
 
 #[test]
 fn test_update_rustacean() {
     let client = Client::new();
-    let json = create_test_rustacean(&client);
+    let rustacean = create_test_rustacean(&client);
 
     let response = client
-        .put(format!("http://127.0.0.1:8000/rustaceans/{}", json["id"]))
+        .put(format!(
+            "http://127.0.0.1:8000/rustaceans/{}",
+            rustacean["id"]
+        ))
         .json(&json!({"email":"trak.pit@gmail.com",
             "name": "trak petros"
         }))
@@ -68,16 +87,17 @@ fn test_update_rustacean() {
         .unwrap();
     assert_eq!(response.status(), StatusCode::OK);
 
-    let json = response.json::<Value>().unwrap();
+    let rustacean = response.json::<Value>().unwrap();
     assert_eq!(
-        json,
+        rustacean,
         json!({
-            "id": json["id"],
+            "id": rustacean["id"],
             "email":"trak.pit@gmail.com",
             "name": "trak petros",
-            "created_at": json["created_at"]
+            "created_at": rustacean["created_at"]
         })
     );
+    clean_test_rustacean(&client, rustacean);
 }
 
 #[test]
