@@ -1,4 +1,5 @@
 use reqwest::{blocking::Client, StatusCode};
+use serde_json::{json, Value};
 
 #[test]
 fn test_get_rustaceans() {
@@ -9,4 +10,29 @@ fn test_get_rustaceans() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::OK)
+}
+
+#[test]
+fn test_create_rustacean() {
+    let client = Client::new();
+    let response = client
+        .post("http:127.0.0.1:8000/rustaceans")
+        .json(&json!(
+            {"email":"pit.trak@gmail.com",
+            "name": "petros trak"}
+        ))
+        .send()
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::CREATED);
+
+    let json = response.json::<Value>().unwrap();
+    assert_eq!(
+        json,
+        json!({
+            "id": json["id"],
+            "email":"pit.trak@gmail.com",
+            "name": "petros trak",
+            "created_at": json["created_at"]
+        })
+    );
 }

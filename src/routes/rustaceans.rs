@@ -34,10 +34,10 @@ pub async fn get_rustacean_by_id(db: DB, id: i32) -> Result<Value, Custom<Value>
 pub async fn create_rustacean(
     db: DB,
     new_rustacean: Json<NewRustacean>,
-) -> Result<Value, Custom<Value>> {
+) -> Result<Custom<Value>, Custom<Value>> {
     db.run(|c| {
         RustaceanRepository::create(c, new_rustacean.into_inner())
-            .map(|rustacean| json!(rustacean))
+            .map(|rustacean| Custom(Status::Created, json!(rustacean)))
             .map_err(|e| Custom(Status::NotFound, json!(e.to_string())))
     })
     .await
