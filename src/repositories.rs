@@ -27,7 +27,7 @@ impl RustaceanRepository {
         diesel::update(rustaceans::table.find(id))
             .set((
                 rustaceans::name.eq(data.name.to_owned()),
-                rustaceans::name.eq(data.email.to_owned()),
+                rustaceans::email.eq(data.email.to_owned()),
             ))
             .execute(conn)?;
         Self::get_by_id(conn, id)

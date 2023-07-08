@@ -43,7 +43,7 @@ pub async fn create_rustacean(
     .await
 }
 
-#[put("/rustacean/<id>", format = "json", data = "<rustacean>")]
+#[put("/rustaceans/<id>", format = "json", data = "<rustacean>")]
 pub async fn update_rustacean(
     db: DB,
     id: i32,
