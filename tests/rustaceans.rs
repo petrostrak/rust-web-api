@@ -23,7 +23,19 @@ fn test_get_rustaceans() {
         .send()
         .unwrap();
 
-    assert_eq!(response.status(), StatusCode::OK)
+    assert_eq!(response.status(), StatusCode::OK);
+
+    let rustacean_1 = create_test_rustacean(&client);
+    let rustacean_2 = create_test_rustacean(&client);
+
+    let response = client
+        .get("http://127.0.0.1:8000/rustaceans")
+        .send()
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let response_json = response.json::<Value>().unwrap();
+    assert!(response_json.as_array().unwrap().contains(&rustacean_1));
+    assert!(response_json.as_array().unwrap().contains(&rustacean_2));
 }
 
 #[test]
