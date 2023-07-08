@@ -24,3 +24,7 @@ To run the application:
 ```bash
 docker compose exec app cargo run
 ```
+To run tests:
+```bash
+docker compose exec app cargo test
+```
