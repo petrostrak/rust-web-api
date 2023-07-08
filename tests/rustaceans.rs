@@ -1,6 +1,20 @@
 use reqwest::{blocking::Client, StatusCode};
 use serde_json::{json, Value};
 
+fn create_test_rustacean(client: &Client) -> Value {
+    let response = client
+        .post("http://127.0.0.1:8000/rustaceans")
+        .json(&json!(
+            {"email":"pit.trak@gmail.com",
+            "name": "petros trak"}
+        ))
+        .send()
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::CREATED);
+
+    response.json::<Value>().unwrap()
+}
+
 #[test]
 fn test_get_rustaceans() {
     let client = Client::new();
@@ -15,17 +29,8 @@ fn test_get_rustaceans() {
 #[test]
 fn test_create_rustacean() {
     let client = Client::new();
-    let response = client
-        .post("http://127.0.0.1:8000/rustaceans")
-        .json(&json!(
-            {"email":"pit.trak@gmail.com",
-            "name": "petros trak"}
-        ))
-        .send()
-        .unwrap();
-    assert_eq!(response.status(), StatusCode::CREATED);
 
-    let json = response.json::<Value>().unwrap();
+    let json = create_test_rustacean(&client);
     assert_eq!(
         json,
         json!({
@@ -40,17 +45,7 @@ fn test_create_rustacean() {
 #[test]
 fn test_update_rustacean() {
     let client = Client::new();
-    let response = client
-        .post("http://127.0.0.1:8000/rustaceans")
-        .json(&json!(
-            {"email":"pit.trak@gmail.com",
-            "name": "petros trak"}
-        ))
-        .send()
-        .unwrap();
-    assert_eq!(response.status(), StatusCode::CREATED);
-
-    let json = response.json::<Value>().unwrap();
+    let json = create_test_rustacean(&client);
 
     let response = client
         .put(format!("http://127.0.0.1:8000/rustaceans/{}", json["id"]))
@@ -76,17 +71,7 @@ fn test_update_rustacean() {
 #[test]
 fn test_delete_rustacean() {
     let client = Client::new();
-    let response = client
-        .post("http://127.0.0.1:8000/rustaceans")
-        .json(&json!(
-            {"email":"pit.trak@gmail.com",
-            "name": "petros trak"}
-        ))
-        .send()
-        .unwrap();
-    assert_eq!(response.status(), StatusCode::CREATED);
-
-    let json = response.json::<Value>().unwrap();
+    let json = create_test_rustacean(&client);
 
     let response = client
         .delete(format!("http://127.0.0.1:8000/rustaceans/{}", json["id"]))
