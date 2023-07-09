@@ -1,8 +1,7 @@
-use diesel::PgConnection;
-use rocket_sync_db_pools::database;
 use routes::{
     crates::{create_crate, delete_crate, get_crate_by_id, get_crates, update_crate},
     rustaceans::*,
+    DB,
 };
 
 #[macro_use]
@@ -14,9 +13,6 @@ mod models;
 mod repositories;
 mod routes;
 mod schema;
-
-#[database("postgres")]
-pub struct DB(PgConnection);
 
 #[rocket::main]
 async fn main() {
