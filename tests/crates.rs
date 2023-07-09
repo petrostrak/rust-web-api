@@ -1,49 +1,185 @@
 use reqwest::{blocking::Client, StatusCode};
 use serde_json::{json, Value};
 
-fn create_test_crate(client: &Client) -> Value {
+pub mod common;
+
+#[test]
+fn test_get_crates() {
+    // Setup
+    let client = Client::new();
+    let rustacean = common::create_test_rustacean(&client);
+    let a_crate = common::create_test_crate(&client, &rustacean);
+    let b_crate = common::create_test_crate(&client, &rustacean);
+
+    // Test
     let response = client
-        .post("http://127.0.0.1:8000/crates")
+        .get(format!("{}/crates", common::APP_HOST))
+        .send()
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let json: Value = response.json().unwrap();
+    assert!(json.as_array().unwrap().contains(&a_crate));
+    assert!(json.as_array().unwrap().contains(&b_crate));
+
+    // Cleanup
+    common::delete_test_crate(&client, a_crate);
+    common::delete_test_crate(&client, b_crate);
+    common::delete_test_rustacean(&client, rustacean);
+}
+
+#[test]
+fn test_create_crate() {
+    // Setup
+    let client = Client::new();
+    let rustacean = common::create_test_rustacean(&client);
+
+    // Test
+    let response = client
+        .post(format!("{}/crates", common::APP_HOST))
         .json(&json!({
-            "rustacean_id":1,
-            "code":"c0d3",
-            "name":"petros",
+            "rustacean_id": rustacean["id"],
+            "code": "foo",
+            "name": "Foo crate",
             "version": "0.1",
-            "description":Some("My new crate!")
+            "description": "Foo crate description"
         }))
         .send()
         .unwrap();
     assert_eq!(response.status(), StatusCode::CREATED);
 
-    response.json::<Value>().unwrap()
-}
+    let a_crate: Value = response.json().unwrap();
+    assert_eq!(
+        a_crate,
+        json!({
+            "id": a_crate["id"],
+            "code": "foo",
+            "name": "Foo crate",
+            "version": "0.1",
+            "description": "Foo crate description",
+            "rustacean_id": rustacean["id"],
+            "created_at": a_crate["created_at"],
+        })
+    );
 
-fn clean_test_crates(client: &Client, crt: Value) {
-    let response = client
-        .delete(format!("http://127.0.0.1:8000/crates/{}", crt["id"]))
-        .send()
-        .unwrap();
-    assert_eq!(response.status(), StatusCode::NO_CONTENT);
+    // Cleanup
+    common::delete_test_crate(&client, a_crate);
+    common::delete_test_rustacean(&client, rustacean);
 }
 
 #[test]
-fn test_get_crates() {
+fn test_view_crate() {
+    // Setup
     let client = Client::new();
-    let response = client.get("http://127.0.0.1:8000/crates").send().unwrap();
+    let rustacean = common::create_test_rustacean(&client);
+    let a_crate = common::create_test_crate(&client, &rustacean);
 
+    // Test
+    let response = client
+        .get(format!("{}/crates/{}", common::APP_HOST, a_crate["id"]))
+        .send()
+        .unwrap();
     assert_eq!(response.status(), StatusCode::OK);
 
-    let crate_1 = create_test_crate(&client);
-    let crate_2 = create_test_crate(&client);
+    let a_crate: Value = response.json().unwrap();
+    assert_eq!(
+        a_crate,
+        json!({
+            "id": a_crate["id"],
+            "code": "foo",
+            "name": "Foo crate",
+            "version": "0.1",
+            "description": "Foo crate description",
+            "rustacean_id": rustacean["id"],
+            "created_at": a_crate["created_at"],
+        })
+    );
 
-    let response = client.get("http://127.0.0.1:8000/crates").send().unwrap();
+    // Cleanup
+    common::delete_test_crate(&client, a_crate);
+    common::delete_test_rustacean(&client, rustacean);
+}
 
+#[test]
+fn test_update_crate() {
+    // Setup
+    let client = Client::new();
+    let rustacean = common::create_test_rustacean(&client);
+    let a_crate = common::create_test_crate(&client, &rustacean);
+
+    // Test
+    let response = client
+        .put(format!("{}/crates/{}", common::APP_HOST, a_crate["id"]))
+        .json(&json!({
+            "code": "fooz",
+            "name": "Fooz crate",
+            "version": "0.2",
+            "description": "Fooz crate description",
+            "rustacean_id": rustacean["id"],
+        }))
+        .send()
+        .unwrap();
     assert_eq!(response.status(), StatusCode::OK);
 
-    let response_json = response.json::<Value>().unwrap();
-    assert!(response_json.as_array().unwrap().contains(&crate_1));
-    assert!(response_json.as_array().unwrap().contains(&crate_2));
+    let a_crate: Value = response.json().unwrap();
+    assert_eq!(
+        a_crate,
+        json!({
+            "id": a_crate["id"],
+            "code": "fooz",
+            "name": "Fooz crate",
+            "version": "0.2",
+            "description": "Fooz crate description",
+            "rustacean_id": rustacean["id"],
+            "created_at": a_crate["created_at"],
+        })
+    );
 
-    clean_test_crates(&client, crate_1);
-    clean_test_crates(&client, crate_2);
+    // Test author-switching and a really long crate description.
+    let rustacean2 = common::create_test_rustacean(&client);
+    let response = client.put(format!("{}/crates/{}", common::APP_HOST, a_crate["id"]))
+        .json(&json!({
+            "code": "fooz",
+            "name": "Fooz crate",
+            "version": "0.2",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque gravida aliquet arcu, non maximus urna iaculis et. Nam eu ante eu dolor volutpat maximus. Sed tincidunt pretium elementum. Quisque rutrum ex id sem luctus rhoncus ac ultrices lacus. Ut vulputate magna facilisis dignissim porttitor. Nulla vitae pretium neque. Vestibulum rutrum semper justo, ut mattis diam. Curabitur a tempus felis. Pellentesque sit amet pharetra nunc. Curabitur est nunc, tincidunt sit amet arcu sed, bibendum accumsan ligula. Maecenas eu dolor sed mi viverra congue. Phasellus vel dignissim lacus, vel tempor velit. Vestibulum vulputate sapien nisi, ac ullamcorper enim sodales vitae. Aliquam erat volutpat. Etiam tincidunt aliquet velit ac vulputate. Aenean et augue dolor.",
+            "rustacean_id": rustacean2["id"],
+        }))
+        .send()
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let a_crate: Value = response.json().unwrap();
+    assert_eq!(
+        a_crate,
+        json!({
+            "id": a_crate["id"],
+            "code": "fooz",
+            "name": "Fooz crate",
+            "version": "0.2",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque gravida aliquet arcu, non maximus urna iaculis et. Nam eu ante eu dolor volutpat maximus. Sed tincidunt pretium elementum. Quisque rutrum ex id sem luctus rhoncus ac ultrices lacus. Ut vulputate magna facilisis dignissim porttitor. Nulla vitae pretium neque. Vestibulum rutrum semper justo, ut mattis diam. Curabitur a tempus felis. Pellentesque sit amet pharetra nunc. Curabitur est nunc, tincidunt sit amet arcu sed, bibendum accumsan ligula. Maecenas eu dolor sed mi viverra congue. Phasellus vel dignissim lacus, vel tempor velit. Vestibulum vulputate sapien nisi, ac ullamcorper enim sodales vitae. Aliquam erat volutpat. Etiam tincidunt aliquet velit ac vulputate. Aenean et augue dolor.",
+            "rustacean_id": rustacean2["id"],
+            "created_at": a_crate["created_at"],
+        })
+    );
+
+    // Cleanup
+    common::delete_test_crate(&client, a_crate);
+    common::delete_test_rustacean(&client, rustacean);
+}
+
+#[test]
+fn test_delete_crate() {
+    // Setup
+    let client = Client::new();
+    let rustacean = common::create_test_rustacean(&client);
+    let a_crate = common::create_test_crate(&client, &rustacean);
+
+    // Test
+    let response = client
+        .delete(format!("{}/crates/{}", common::APP_HOST, a_crate["id"]))
+        .send()
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::NO_CONTENT);
+
+    // Cleanup
+    common::delete_test_rustacean(&client, rustacean);
 }
