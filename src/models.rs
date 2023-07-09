@@ -42,7 +42,7 @@ pub struct NewCrate {
     pub description: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Queryable)]
+#[derive(Debug, Queryable, Identifiable)]
 pub struct User {
     pub id: i32,
     pub username: String,
@@ -57,7 +57,7 @@ pub struct NewUser {
     pub password: String,
 }
 
-#[derive(Serialize, Deserialize, Queryable)]
+#[derive(Debug, Queryable)]
 pub struct Role {
     pub id: i32,
     pub code: String,
@@ -72,7 +72,7 @@ pub struct NewRole {
     pub name: String,
 }
 
-#[derive(Associations)]
+#[derive(Identifiable, Associations, Queryable)]
 #[diesel(belongs_to(User))]
 #[diesel(belongs_to(Role))]
 #[diesel(table_name = users_roles)]

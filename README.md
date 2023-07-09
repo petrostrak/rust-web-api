@@ -20,11 +20,15 @@ To execute migrations via docker compose:
 ```bash
 docker compose exec app diesel migration run
 ```
-To run the application:
-```bash
-docker compose exec app cargo run
-```
 To run tests:
 ```bash
 docker compose exec app cargo test
+```
+To run the cli application:
+```bash
+docker compose exec app cargo run --bin cli
+```
+To create users via the cli:
+```bash
+docker compose exec app cargo run --bin cli users create <name> <password> <role>
 ```
