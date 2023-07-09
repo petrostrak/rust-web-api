@@ -73,8 +73,8 @@ pub struct NewRole {
 }
 
 #[derive(Associations)]
-#[belongs_to(User)]
-#[belongs_to(Role)]
+#[diesel(belongs_to(User))]
+#[diesel(belongs_to(Role))]
 #[diesel(table_name = users_roles)]
 pub struct UserRole {
     pub id: i32,
