@@ -1,13 +1,11 @@
 extern crate rustwebapi;
-#[macro_use]
-extern crate rocket;
 
 #[rocket::main]
 async fn main() {
     let _ = rocket::build()
         .mount(
             "/",
-            routes![
+            rocket::routes![
                 rustwebapi::routes::rustaceans::get_rustaceans,
                 rustwebapi::routes::rustaceans::get_rustacean_by_id,
                 rustwebapi::routes::rustaceans::create_rustacean,

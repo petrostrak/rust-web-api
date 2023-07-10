@@ -3,15 +3,14 @@ pub mod crates;
 pub mod rustaceans;
 
 use diesel::PgConnection;
-use rocket::{http::Status, response::status::Custom};
-use rocket_sync_db_pools::database;
-use serde_json::{json, Value};
-use std::error::Error;
+use rocket::http::Status;
+use rocket::response::status::Custom;
+use rocket::serde::json::{serde_json::json, Value};
 
-#[database("postgres")]
+#[rocket_sync_db_pools::database("postgres")]
 pub struct DB(PgConnection);
 
-fn server_error(e: &Box<dyn Error>) -> Custom<Value> {
+fn server_error(e: &Box<dyn std::error::Error>) -> Custom<Value> {
     log::error!("{}", e);
     Custom(Status::InternalServerError, json!("Something went wrong"))
 }
