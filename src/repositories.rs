@@ -122,7 +122,8 @@ impl UserRepository {
     }
 
     pub fn delete(conn: &mut PgConnection, id: i32) -> QueryResult<usize> {
-        diesel::delete(users::table.find(id)).execute(conn)
+        diesel::delete(users::table.find(id)).execute(conn)?;
+        diesel::delete(users_roles::table.filter(users_roles::user_id.eq(id))).execute(conn)
     }
 }
 
