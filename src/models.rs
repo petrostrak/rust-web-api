@@ -72,7 +72,7 @@ pub struct NewRole {
     pub name: String,
 }
 
-#[derive(Identifiable, Associations, Queryable)]
+#[derive(Debug, Identifiable, Associations, Queryable)]
 #[diesel(belongs_to(User))]
 #[diesel(belongs_to(Role))]
 #[diesel(table_name = users_roles)]

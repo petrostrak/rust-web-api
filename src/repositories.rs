@@ -79,11 +79,15 @@ impl CrateRepository {
 pub struct UserRepository;
 
 impl UserRepository {
-    pub fn get_all(conn: &mut PgConnection, limit: i64) -> QueryResult<Vec<User>> {
-        users::table
-            .limit(limit)
-            .order(users::id.desc())
-            .load::<User>(conn)
+    pub fn get_with_roles(
+        conn: &mut PgConnection,
+    ) -> QueryResult<Vec<(User, Vec<(UserRole, Role)>)>> {
+        let users = users::table.load::<User>(conn)?;
+        let result = users_roles::table
+            .inner_join(roles::table)
+            .load::<(UserRole, Role)>(conn)?
+            .grouped_by(&users);
+        Ok(users.into_iter().zip(result).collect())
     }
 
     pub fn create(
