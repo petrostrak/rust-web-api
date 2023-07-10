@@ -1,17 +1,12 @@
-use rocket::{
-    http::Status,
-    response::status::{Custom, NoContent},
-    serde::json::{serde_json::json, Json, Value},
-};
+use rocket::http::Status;
+use rocket::response::status::{Custom, NoContent};
+use rocket::serde::json::{serde_json::json, Json, Value};
 
-use crate::{
-    models::{NewRustacean, Rustacean},
-    repositories::RustaceanRepository,
-    routes::server_error,
-    DB,
-};
+use crate::models::{NewRustacean, Rustacean};
+use crate::repositories::RustaceanRepository;
+use crate::routes::{server_error, DB};
 
-#[get("/rustaceans")]
+#[rocket::get("/rustaceans")]
 pub async fn get_rustaceans(db: DB) -> Result<Value, Custom<Value>> {
     db.run(|c| {
         RustaceanRepository::get_all(c, 100)
@@ -21,7 +16,7 @@ pub async fn get_rustaceans(db: DB) -> Result<Value, Custom<Value>> {
     .await
 }
 
-#[get("/rustaceans/<id>")]
+#[rocket::get("/rustaceans/<id>")]
 pub async fn get_rustacean_by_id(db: DB, id: i32) -> Result<Value, Custom<Value>> {
     db.run(move |c| {
         RustaceanRepository::get_by_id(c, id)
@@ -31,7 +26,7 @@ pub async fn get_rustacean_by_id(db: DB, id: i32) -> Result<Value, Custom<Value>
     .await
 }
 
-#[post("/rustaceans", format = "json", data = "<new_rustacean>")]
+#[rocket::post("/rustaceans", format = "json", data = "<new_rustacean>")]
 pub async fn create_rustacean(
     db: DB,
     new_rustacean: Json<NewRustacean>,
@@ -44,7 +39,7 @@ pub async fn create_rustacean(
     .await
 }
 
-#[put("/rustaceans/<id>", format = "json", data = "<rustacean>")]
+#[rocket::put("/rustaceans/<id>", format = "json", data = "<rustacean>")]
 pub async fn update_rustacean(
     db: DB,
     id: i32,
@@ -58,7 +53,7 @@ pub async fn update_rustacean(
     .await
 }
 
-#[delete("/rustaceans/<id>")]
+#[rocket::delete("/rustaceans/<id>")]
 pub async fn delete_rustacean(db: DB, id: i32) -> Result<NoContent, Custom<Value>> {
     db.run(move |c| {
         RustaceanRepository::delete(c, id)

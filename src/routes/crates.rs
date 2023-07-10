@@ -1,18 +1,12 @@
-use rocket::{
-    http::Status,
-    response::status::{Custom, NoContent},
-    serde::json::Json,
-};
-use serde_json::{json, Value};
+use rocket::http::Status;
+use rocket::response::status::{Custom, NoContent};
+use rocket::serde::json::{serde_json::json, Json, Value};
 
-use crate::{
-    models::{Crate, NewCrate},
-    repositories::CrateRepository,
-    routes::server_error,
-    DB,
-};
+use crate::models::{Crate, NewCrate};
+use crate::repositories::CrateRepository;
+use crate::routes::{server_error, DB};
 
-#[get("/crates")]
+#[rocket::get("/crates")]
 pub async fn get_crates(db: DB) -> Result<Value, Custom<Value>> {
     db.run(|c| {
         CrateRepository::get_all(c, 100)
@@ -22,7 +16,7 @@ pub async fn get_crates(db: DB) -> Result<Value, Custom<Value>> {
     .await
 }
 
-#[get("/crates/<id>")]
+#[rocket::get("/crates/<id>")]
 pub async fn get_crate_by_id(db: DB, id: i32) -> Result<Value, Custom<Value>> {
     db.run(move |c| {
         CrateRepository::get_by_id(c, id)
@@ -32,7 +26,7 @@ pub async fn get_crate_by_id(db: DB, id: i32) -> Result<Value, Custom<Value>> {
     .await
 }
 
-#[post("/crates", format = "json", data = "<new_crate>")]
+#[rocket::post("/crates", format = "json", data = "<new_crate>")]
 pub async fn create_crate(
     db: DB,
     new_crate: Json<NewCrate>,
@@ -45,7 +39,7 @@ pub async fn create_crate(
     .await
 }
 
-#[put("/crates/<id>", format = "json", data = "<crt>")]
+#[rocket::put("/crates/<id>", format = "json", data = "<crt>")]
 pub async fn update_crate(db: DB, id: i32, crt: Json<Crate>) -> Result<Value, Custom<Value>> {
     db.run(move |c| {
         CrateRepository::update(c, id, crt.into_inner())
@@ -55,7 +49,7 @@ pub async fn update_crate(db: DB, id: i32, crt: Json<Crate>) -> Result<Value, Cu
     .await
 }
 
-#[delete("/crates/<id>")]
+#[rocket::delete("/crates/<id>")]
 pub async fn delete_crate(db: DB, id: i32) -> Result<NoContent, Custom<Value>> {
     db.run(move |c| {
         CrateRepository::delete(c, id)

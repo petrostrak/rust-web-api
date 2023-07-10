@@ -1,21 +1,20 @@
 use argon2::PasswordHash;
 use rocket::{
     response::status::Custom,
-    serde::json::{json, Json, Value},
+    serde::json::{serde_json::json, Json, Value},
 };
-use serde::Deserialize;
 
 use crate::repositories::UserRepository;
 
 use super::{server_error, DB};
 
-#[derive(Deserialize)]
+#[derive(serde::Deserialize)]
 pub struct Credentials {
     username: String,
     password: String,
 }
 
-#[post("/login", format = "json", data = "<credentials>")]
+#[rocket::post("/login", format = "json", data = "<credentials>")]
 pub async fn login(db: DB, credentials: Json<Credentials>) -> Result<Value, Custom<Value>> {
     db.run(move |c| {
         UserRepository::get_by_username(c, &credentials.username)
