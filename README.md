@@ -32,3 +32,11 @@ To create users via the cli:
 ```bash
 docker compose exec app cargo run --bin cli users create <name> <password> <role>
 ```
+To list all users via the cli:
+```bash
+docker compose exec app cargo run --bin cli users list
+```
+To delete a users via the cli:
+```bash
+docker compose exec app cargo run --bin cli users delete <id>
+```
