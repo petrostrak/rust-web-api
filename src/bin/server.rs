@@ -17,7 +17,8 @@ async fn main() {
                 rustwebapi::routes::crates::get_crate_by_id,
                 rustwebapi::routes::crates::create_crate,
                 rustwebapi::routes::crates::update_crate,
-                rustwebapi::routes::crates::delete_crate
+                rustwebapi::routes::crates::delete_crate,
+                rustwebapi::routes::authorization::login
             ],
         )
         .attach(rustwebapi::routes::DB::fairing())

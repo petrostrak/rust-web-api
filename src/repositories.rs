@@ -79,6 +79,12 @@ impl CrateRepository {
 pub struct UserRepository;
 
 impl UserRepository {
+    pub fn get_by_username(conn: &mut PgConnection, username: &String) -> QueryResult<User> {
+        users::table
+            .filter(users::username.eq(username))
+            .get_result::<User>(conn)
+    }
+
     pub fn get_with_roles(
         conn: &mut PgConnection,
     ) -> QueryResult<Vec<(User, Vec<(UserRole, Role)>)>> {
