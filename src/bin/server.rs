@@ -1,3 +1,5 @@
+use rocket_db_pools::Database;
+
 extern crate rustwebapi;
 
 #[rocket::main]
@@ -20,6 +22,7 @@ async fn main() {
             ],
         )
         .attach(rustwebapi::routes::DB::fairing())
+        .attach(rustwebapi::routes::Cache::init())
         .launch()
         .await;
 }
