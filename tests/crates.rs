@@ -1,4 +1,4 @@
-use reqwest::{blocking::Client, StatusCode};
+use reqwest::StatusCode;
 use serde_json::{json, Value};
 
 pub mod common;
@@ -6,12 +6,13 @@ pub mod common;
 #[test]
 fn test_get_crates() {
     // Setup
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
     let a_crate = common::create_test_crate(&client, &rustacean);
     let b_crate = common::create_test_crate(&client, &rustacean);
 
     // Test
+    let client = common::get_client_with_logged_in_viewer();
     let response = client
         .get(format!("{}/crates", common::APP_HOST))
         .send()
@@ -22,6 +23,7 @@ fn test_get_crates() {
     assert!(json.as_array().unwrap().contains(&b_crate));
 
     // Cleanup
+    let client = common::get_client_with_logged_in_admin();
     common::delete_test_crate(&client, a_crate);
     common::delete_test_crate(&client, b_crate);
     common::delete_test_rustacean(&client, rustacean);
@@ -30,7 +32,7 @@ fn test_get_crates() {
 #[test]
 fn test_create_crate() {
     // Setup
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
 
     // Test
@@ -69,11 +71,12 @@ fn test_create_crate() {
 #[test]
 fn test_view_crate() {
     // Setup
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
     let a_crate = common::create_test_crate(&client, &rustacean);
 
     // Test
+    let client = common::get_client_with_logged_in_viewer();
     let response = client
         .get(format!("{}/crates/{}", common::APP_HOST, a_crate["id"]))
         .send()
@@ -95,6 +98,7 @@ fn test_view_crate() {
     );
 
     // Cleanup
+    let client = common::get_client_with_logged_in_admin();
     common::delete_test_crate(&client, a_crate);
     common::delete_test_rustacean(&client, rustacean);
 }
@@ -102,7 +106,7 @@ fn test_view_crate() {
 #[test]
 fn test_update_crate() {
     // Setup
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
     let a_crate = common::create_test_crate(&client, &rustacean);
 
@@ -169,7 +173,7 @@ fn test_update_crate() {
 #[test]
 fn test_delete_crate() {
     // Setup
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
     let a_crate = common::create_test_crate(&client, &rustacean);
 
