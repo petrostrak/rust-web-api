@@ -1,4 +1,4 @@
-## Rust Web-API
+## Rustycrates
 An advanced Rocket REST API written in Rust that 
 *  implements an authentication service
 *  implements a cache database with Redis
