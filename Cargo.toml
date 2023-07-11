@@ -8,13 +8,13 @@ edition = "2021"
 
 [dependencies]
 rocket = { version = "0.5.0-rc", features = ["json"] }
-rocket_sync_db_pools = { version = "0.1.0-rc", features = ["diesel_postgres_pool"]}
+rocket_sync_db_pools = { version = "0.1.0-rc", features = ["diesel_postgres_pool"] }
 rocket_db_pools = { version = "0.1.0-rc", features = ["deadpool_redis"] }
-diesel = { version = "2.0", features = ["postgres", "chrono"]}
-chrono = { version = "0.4", features = ["serde"]}
-serde = { version = "1.0", features = ["derive"]}
+serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-log = "0.4.0"
+diesel = { version = "2.0", features = ["postgres", "chrono"] }
+chrono = { version = "0.4", features = ["serde"] }
+log = "0.4"
 clap = "4.2"
 argon2 = "0.5"
 rand = "0.8"
