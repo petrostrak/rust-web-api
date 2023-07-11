@@ -1,110 +1,100 @@
-use crate::models::*;
-use crate::schema::*;
 use diesel::dsl::now;
 use diesel::dsl::IntervalDsl;
 use diesel::prelude::*;
-use diesel::{PgConnection, QueryResult};
+
+use crate::models::*;
+use crate::schema::*;
 
 pub struct RustaceanRepository;
 
 impl RustaceanRepository {
-    pub fn get_all(conn: &mut PgConnection, limit: i64) -> QueryResult<Vec<Rustacean>> {
-        rustaceans::table
-            .limit(limit)
-            .order(rustaceans::id.desc())
-            .load::<Rustacean>(conn)
+    pub fn find(c: &mut PgConnection, id: i32) -> QueryResult<Rustacean> {
+        rustaceans::table.find(id).get_result(c)
     }
 
-    pub fn get_by_id(conn: &mut PgConnection, id: i32) -> QueryResult<Rustacean> {
-        rustaceans::table.find(id).get_result::<Rustacean>(conn)
+    pub fn find_multiple(c: &mut PgConnection, limit: i64) -> QueryResult<Vec<Rustacean>> {
+        rustaceans::table.limit(limit).load(c)
     }
 
-    pub fn create(conn: &mut PgConnection, data: NewRustacean) -> QueryResult<Rustacean> {
+    pub fn create(c: &mut PgConnection, new_rustacean: NewRustacean) -> QueryResult<Rustacean> {
         diesel::insert_into(rustaceans::table)
-            .values(data)
-            .get_result(conn)
+            .values(new_rustacean)
+            .get_result(c)
     }
 
-    pub fn update(conn: &mut PgConnection, id: i32, data: Rustacean) -> QueryResult<Rustacean> {
+    pub fn update(c: &mut PgConnection, id: i32, rustacean: Rustacean) -> QueryResult<Rustacean> {
         diesel::update(rustaceans::table.find(id))
             .set((
-                rustaceans::name.eq(data.name.to_owned()),
-                rustaceans::email.eq(data.email.to_owned()),
+                rustaceans::name.eq(rustacean.name),
+                rustaceans::email.eq(rustacean.email),
             ))
-            .execute(conn)?;
-        Self::get_by_id(conn, id)
+            .get_result(c)
     }
 
-    pub fn delete(conn: &mut PgConnection, id: i32) -> QueryResult<usize> {
-        diesel::delete(rustaceans::table.find(id)).execute(conn)
+    pub fn delete(c: &mut PgConnection, id: i32) -> QueryResult<usize> {
+        diesel::delete(rustaceans::table.find(id)).execute(c)
     }
 }
 
 pub struct CrateRepository;
 
 impl CrateRepository {
-    pub fn get_all(conn: &mut PgConnection, limit: i64) -> QueryResult<Vec<Crate>> {
-        crates::table
-            .limit(limit)
-            .order(crates::id.desc())
-            .load::<Crate>(conn)
+    pub fn find(c: &mut PgConnection, id: i32) -> QueryResult<Crate> {
+        crates::table.find(id).get_result(c)
     }
 
-    pub fn get_since(conn: &mut PgConnection, hours_since: i32) -> QueryResult<Vec<Crate>> {
+    pub fn find_multiple(c: &mut PgConnection, limit: i64) -> QueryResult<Vec<Crate>> {
+        crates::table.limit(limit).load(c)
+    }
+
+    pub fn find_since(c: &mut PgConnection, hours_since: i32) -> QueryResult<Vec<Crate>> {
         crates::table
             .filter(crates::created_at.ge(now - hours_since.seconds()))
             .order(crates::id.desc())
-            .load::<Crate>(conn)
+            .load::<Crate>(c)
     }
 
-    pub fn get_by_id(conn: &mut PgConnection, id: i32) -> QueryResult<Crate> {
-        crates::table.find(id).get_result::<Crate>(conn)
-    }
-
-    pub fn create(conn: &mut PgConnection, data: NewCrate) -> QueryResult<Crate> {
+    pub fn create(c: &mut PgConnection, new_crate: NewCrate) -> QueryResult<Crate> {
         diesel::insert_into(crates::table)
-            .values(data)
-            .get_result(conn)
+            .values(new_crate)
+            .get_result(c)
     }
 
-    pub fn update(conn: &mut PgConnection, id: i32, data: Crate) -> QueryResult<Crate> {
+    pub fn update(c: &mut PgConnection, id: i32, a_crate: Crate) -> QueryResult<Crate> {
         diesel::update(crates::table.find(id))
             .set((
-                crates::rustacean_id.eq(data.rustacean_id.to_owned()),
-                crates::code.eq(data.code.to_owned()),
-                crates::name.eq(data.name.to_owned()),
-                crates::version.eq(data.version.to_owned()),
-                crates::description.eq(data.description.to_owned()),
+                crates::rustacean_id.eq(a_crate.rustacean_id),
+                crates::code.eq(a_crate.code),
+                crates::name.eq(a_crate.name),
+                crates::version.eq(a_crate.version),
+                crates::description.eq(a_crate.description),
             ))
-            .execute(conn)?;
-        Self::get_by_id(conn, id)
+            .get_result(c)
     }
 
-    pub fn delete(conn: &mut PgConnection, id: i32) -> QueryResult<usize> {
-        diesel::delete(crates::table.find(id)).execute(conn)
+    pub fn delete(c: &mut PgConnection, id: i32) -> QueryResult<usize> {
+        diesel::delete(crates::table.find(id)).execute(c)
     }
 }
 
 pub struct UserRepository;
 
 impl UserRepository {
-    pub fn get_by_id(c: &mut PgConnection, id: i32) -> QueryResult<User> {
+    pub fn find(c: &mut PgConnection, id: i32) -> QueryResult<User> {
         users::table.find(id).get_result(c)
     }
 
-    pub fn get_by_username(conn: &mut PgConnection, username: &String) -> QueryResult<User> {
-        users::table
-            .filter(users::username.eq(username))
-            .get_result::<User>(conn)
+    pub fn find_by_username(c: &mut PgConnection, username: &String) -> QueryResult<User> {
+        users::table.filter(users::username.eq(username)).first(c)
     }
 
-    pub fn get_with_roles(
-        conn: &mut PgConnection,
+    pub fn find_with_roles(
+        c: &mut PgConnection,
     ) -> QueryResult<Vec<(User, Vec<(UserRole, Role)>)>> {
-        let users = users::table.load::<User>(conn)?;
+        let users = users::table.load(c)?;
         let result = users_roles::table
             .inner_join(roles::table)
-            .load::<(UserRole, Role)>(conn)?
+            .load::<(UserRole, Role)>(c)?
             .grouped_by(&users);
         Ok(users.into_iter().zip(result).collect())
     }
@@ -120,7 +110,7 @@ impl UserRepository {
 
         for role_code in role_codes {
             let new_user_role = {
-                if let Ok(role) = RoleRepository::get_by_code(c, &role_code) {
+                if let Ok(role) = RoleRepository::find_by_code(c, &role_code) {
                     NewUserRole {
                         user_id: user.id,
                         role_id: role.id,
@@ -147,41 +137,34 @@ impl UserRepository {
         Ok(user)
     }
 
-    pub fn delete(conn: &mut PgConnection, id: i32) -> QueryResult<usize> {
-        diesel::delete(users_roles::table.filter(users_roles::user_id.eq(id))).execute(conn)?;
-        diesel::delete(users::table.find(id)).execute(conn)
+    pub fn delete(c: &mut PgConnection, id: i32) -> QueryResult<usize> {
+        diesel::delete(users_roles::table.filter(users_roles::user_id.eq(id))).execute(c)?;
+
+        diesel::delete(users::table.find(id)).execute(c)
     }
 }
 
 pub struct RoleRepository;
 
 impl RoleRepository {
-    pub fn get_by_user(conn: &mut PgConnection, user: &User) -> QueryResult<Vec<Role>> {
-        let user_roles = UserRole::belonging_to(user).get_results(conn)?;
-        Self::get_by_ids(
-            conn,
-            user_roles
-                .iter()
-                .map(|user_role: &UserRole| user_role.role_id)
-                .collect(),
-        )
+    pub fn find_by_code(c: &mut PgConnection, code: &RoleCode) -> QueryResult<Role> {
+        roles::table.filter(roles::code.eq(code)).first(c)
     }
 
-    pub fn get_by_ids(conn: &mut PgConnection, ids: Vec<i32>) -> QueryResult<Vec<Role>> {
-        roles::table
-            .filter(roles::id.eq_any(ids))
-            .get_results::<Role>(conn)
+    pub fn find_by_ids(c: &mut PgConnection, ids: Vec<i32>) -> QueryResult<Vec<Role>> {
+        roles::table.filter(roles::id.eq_any(ids)).get_results(c)
     }
 
-    pub fn get_by_code(conn: &mut PgConnection, code: &RoleCode) -> QueryResult<Role> {
-        roles::table
-            .filter(roles::code.eq(code))
-            .get_result::<Role>(conn)
+    pub fn find_by_user(c: &mut PgConnection, user: &User) -> QueryResult<Vec<Role>> {
+        let user_roles = UserRole::belonging_to(&user).get_results(c)?;
+
+        let role_ids = user_roles.iter().map(|ur: &UserRole| ur.role_id).collect();
+        Self::find_by_ids(c, role_ids)
     }
 
-    pub fn create(conn: &mut PgConnection, data: NewRole) -> QueryResult<Role> {
+    pub fn create(c: &mut PgConnection, new_role: NewRole) -> QueryResult<Role> {
         diesel::insert_into(roles::table)
-            .values(data)
-            .get_result(conn)
+            .values(new_role)
+            .get_result::<Role>(c)
     }
 }

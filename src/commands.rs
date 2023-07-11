@@ -34,14 +34,14 @@ pub fn create_user(username: String, password: String, role_codes: Vec<String>) 
         .collect();
     let user = UserRepository::create(&mut c, new_user, role_codes).unwrap();
     println!("User created {:?}", user);
-    let roles = RoleRepository::get_by_user(&mut c, &user).unwrap();
+    let roles = RoleRepository::find_by_user(&mut c, &user).unwrap();
     println!("Role assigned {:?}", roles);
 }
 
 pub fn list_users() {
     let mut c = load_db_connection();
 
-    let users = UserRepository::get_with_roles(&mut c).unwrap();
+    let users = UserRepository::find_with_roles(&mut c).unwrap();
     for user in users {
         println!("{:?}", user);
     }
@@ -57,7 +57,7 @@ pub fn send_digest(to: String, hours_since: i32) {
     let mut c = load_db_connection();
     let tera = load_template_engine();
 
-    let crates = CrateRepository::get_since(&mut c, hours_since).unwrap();
+    let crates = CrateRepository::find_since(&mut c, hours_since).unwrap();
     if crates.len() > 0 {
         println!("Sending the digest for {} crates", crates.len());
         let year = Utc::now().year();

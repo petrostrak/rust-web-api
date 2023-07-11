@@ -8,10 +8,12 @@ use diesel::pg::{Pg, PgValue};
 use diesel::serialize::ToSql;
 use diesel::serialize::{IsNull, Output};
 use diesel::sql_types::Text;
-use diesel::{AsExpression, Associations, FromSqlRow, Identifiable, Insertable, Queryable};
+use diesel::{
+    AsChangeset, AsExpression, Associations, FromSqlRow, Identifiable, Insertable, Queryable,
+};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Queryable)]
+#[derive(Queryable, AsChangeset, Deserialize, Serialize)]
 pub struct Rustacean {
     #[serde(skip_deserializing)]
     pub id: i32,
@@ -21,14 +23,14 @@ pub struct Rustacean {
     pub created_at: NaiveDateTime,
 }
 
-#[derive(Deserialize, Insertable)]
-#[diesel(table_name = rustaceans)]
+#[derive(Insertable, Deserialize)]
+#[diesel(table_name=rustaceans)]
 pub struct NewRustacean {
     pub name: String,
     pub email: String,
 }
 
-#[derive(Serialize, Deserialize, Queryable)]
+#[derive(Queryable, AsChangeset, Serialize, Deserialize)]
 pub struct Crate {
     #[serde(skip_deserializing)]
     pub id: i32,
@@ -41,8 +43,8 @@ pub struct Crate {
     pub created_at: NaiveDateTime,
 }
 
-#[derive(Deserialize, Insertable)]
-#[diesel(table_name = crates)]
+#[derive(Insertable, Deserialize)]
+#[diesel(table_name=crates)]
 pub struct NewCrate {
     pub rustacean_id: i32,
     pub code: String,
@@ -51,22 +53,23 @@ pub struct NewCrate {
     pub description: Option<String>,
 }
 
-#[derive(Debug, Queryable, Identifiable)]
+#[derive(Queryable, Debug, Identifiable, Serialize)]
 pub struct User {
     pub id: i32,
     pub username: String,
+    #[serde(skip_serializing)]
     pub password: String,
     pub created_at: NaiveDateTime,
 }
 
-#[derive(Deserialize, Insertable)]
-#[diesel(table_name = users)]
+#[derive(Insertable)]
+#[diesel(table_name=users)]
 pub struct NewUser {
     pub username: String,
     pub password: String,
 }
 
-#[derive(Debug, Queryable)]
+#[derive(Queryable, Debug)]
 pub struct Role {
     pub id: i32,
     pub code: RoleCode,
@@ -75,24 +78,23 @@ pub struct Role {
 }
 
 #[derive(Insertable)]
-#[diesel(table_name = roles)]
+#[diesel(table_name=roles)]
 pub struct NewRole {
     pub code: RoleCode,
     pub name: String,
 }
 
-#[derive(Debug, Identifiable, Associations, Queryable)]
+#[derive(Queryable, Associations, Identifiable, Debug)]
 #[diesel(belongs_to(User))]
 #[diesel(belongs_to(Role))]
-#[diesel(table_name = users_roles)]
+#[diesel(table_name=users_roles)]
 pub struct UserRole {
     pub id: i32,
     pub user_id: i32,
     pub role_id: i32,
 }
-
-#[derive(Deserialize, Insertable)]
-#[diesel(table_name = users_roles)]
+#[derive(Insertable)]
+#[diesel(table_name=users_roles)]
 pub struct NewUserRole {
     pub user_id: i32,
     pub role_id: i32,
