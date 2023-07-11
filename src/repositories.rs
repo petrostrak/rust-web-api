@@ -101,37 +101,40 @@ impl UserRepository {
     }
 
     pub fn create(
-        conn: &mut PgConnection,
-        data: NewUser,
-        role_codes: Vec<String>,
+        c: &mut PgConnection,
+        new_user: NewUser,
+        role_codes: Vec<RoleCode>,
     ) -> QueryResult<User> {
         let user = diesel::insert_into(users::table)
-            .values(data)
-            .get_result::<User>(conn)?;
+            .values(new_user)
+            .get_result::<User>(c)?;
 
         for role_code in role_codes {
             let new_user_role = {
-                if let Ok(role) = RoleRepository::get_by_code(conn, &role_code) {
+                if let Ok(role) = RoleRepository::get_by_code(c, &role_code) {
                     NewUserRole {
                         user_id: user.id,
                         role_id: role.id,
                     }
                 } else {
+                    let name = role_code.to_string();
                     let new_role = NewRole {
-                        code: role_code.to_owned(),
-                        name: role_code.to_owned(),
+                        name,
+                        code: role_code,
                     };
-                    let role = RoleRepository::create(conn, new_role)?;
+                    let role = RoleRepository::create(c, new_role)?;
                     NewUserRole {
                         user_id: user.id,
                         role_id: role.id,
                     }
                 }
             };
+
             diesel::insert_into(users_roles::table)
                 .values(new_user_role)
-                .execute(conn)?;
+                .get_result::<UserRole>(c)?;
         }
+
         Ok(user)
     }
 
@@ -161,7 +164,7 @@ impl RoleRepository {
             .get_results::<Role>(conn)
     }
 
-    pub fn get_by_code(conn: &mut PgConnection, code: &String) -> QueryResult<Role> {
+    pub fn get_by_code(conn: &mut PgConnection, code: &RoleCode) -> QueryResult<Role> {
         roles::table
             .filter(roles::code.eq(code))
             .get_result::<Role>(conn)
