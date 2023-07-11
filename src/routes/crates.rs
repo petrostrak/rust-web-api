@@ -6,6 +6,8 @@ use crate::models::{Crate, NewCrate, User};
 use crate::repositories::CrateRepository;
 use crate::routes::{server_error, DB};
 
+use super::EditorUser;
+
 #[rocket::get("/crates")]
 pub async fn get_crates(db: DB, _user: User) -> Result<Value, Custom<Value>> {
     db.run(|c| {
@@ -30,7 +32,7 @@ pub async fn get_crate_by_id(db: DB, id: i32, _user: User) -> Result<Value, Cust
 pub async fn create_crate(
     db: DB,
     new_crate: Json<NewCrate>,
-    _user: User,
+    _user: EditorUser,
 ) -> Result<Custom<Value>, Custom<Value>> {
     db.run(|c| {
         CrateRepository::create(c, new_crate.into_inner())
@@ -45,7 +47,7 @@ pub async fn update_crate(
     db: DB,
     id: i32,
     crt: Json<Crate>,
-    _user: User,
+    _user: EditorUser,
 ) -> Result<Value, Custom<Value>> {
     db.run(move |c| {
         CrateRepository::update(c, id, crt.into_inner())
@@ -56,7 +58,7 @@ pub async fn update_crate(
 }
 
 #[rocket::delete("/crates/<id>")]
-pub async fn delete_crate(db: DB, id: i32, _user: User) -> Result<NoContent, Custom<Value>> {
+pub async fn delete_crate(db: DB, id: i32, _user: EditorUser) -> Result<NoContent, Custom<Value>> {
     db.run(move |c| {
         CrateRepository::delete(c, id)
             .map(|_| NoContent)
