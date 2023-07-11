@@ -24,6 +24,10 @@ To run tests:
 ```bash
 docker compose exec app cargo test
 ```
+To run the server:
+```bash
+docker compose exec app cargo run
+```
 To run the cli application:
 ```bash
 docker compose exec app cargo run --bin cli
