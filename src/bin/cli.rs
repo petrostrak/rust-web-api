@@ -1,10 +1,10 @@
 use clap::{Arg, Command};
 
-extern crate rustwebapi;
+extern crate rustycrates;
 
 fn main() {
-    let matches = Command::new("rustwebapi")
-        .about("rustwebapi commands")
+    let matches = Command::new("rustycrates")
+        .about("rustycrates commands")
         .arg_required_else_help(true)
         .subcommand(
             Command::new("users")
@@ -46,7 +46,7 @@ fn main() {
 
     match matches.subcommand() {
         Some(("users", sub_matches)) => match sub_matches.subcommand() {
-            Some(("create", sub_matches)) => rustwebapi::commands::create_user(
+            Some(("create", sub_matches)) => rustycrates::commands::create_user(
                 sub_matches
                     .get_one::<String>("username")
                     .unwrap()
@@ -61,13 +61,13 @@ fn main() {
                     .map(|v| v.to_string())
                     .collect(),
             ),
-            Some(("list", _)) => rustwebapi::commands::list_users(),
-            Some(("delete", sub_matches)) => rustwebapi::commands::delete_user(
+            Some(("list", _)) => rustycrates::commands::list_users(),
+            Some(("delete", sub_matches)) => rustycrates::commands::delete_user(
                 sub_matches.get_one::<i32>("id").unwrap().to_owned(),
             ),
             _ => {}
         },
-        Some(("digest-send", sub_matches)) => rustwebapi::commands::send_digest(
+        Some(("digest-send", sub_matches)) => rustycrates::commands::send_digest(
             sub_matches.get_one::<String>("to").unwrap().to_owned(),
             sub_matches
                 .get_one::<i32>("hours_since")

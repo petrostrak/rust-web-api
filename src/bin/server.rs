@@ -1,6 +1,6 @@
 use rocket_db_pools::Database;
 
-extern crate rustwebapi;
+extern crate rustycrates;
 
 #[rocket::main]
 async fn main() {
@@ -8,21 +8,21 @@ async fn main() {
         .mount(
             "/",
             rocket::routes![
-                rustwebapi::routes::rustaceans::get_rustaceans,
-                rustwebapi::routes::rustaceans::get_rustacean_by_id,
-                rustwebapi::routes::rustaceans::create_rustacean,
-                rustwebapi::routes::rustaceans::update_rustacean,
-                rustwebapi::routes::rustaceans::delete_rustacean,
-                rustwebapi::routes::crates::get_crates,
-                rustwebapi::routes::crates::get_crate_by_id,
-                rustwebapi::routes::crates::create_crate,
-                rustwebapi::routes::crates::update_crate,
-                rustwebapi::routes::crates::delete_crate,
-                rustwebapi::routes::authorization::login
+                rustycrates::routes::rustaceans::get_rustaceans,
+                rustycrates::routes::rustaceans::get_rustacean_by_id,
+                rustycrates::routes::rustaceans::create_rustacean,
+                rustycrates::routes::rustaceans::update_rustacean,
+                rustycrates::routes::rustaceans::delete_rustacean,
+                rustycrates::routes::crates::get_crates,
+                rustycrates::routes::crates::get_crate_by_id,
+                rustycrates::routes::crates::create_crate,
+                rustycrates::routes::crates::update_crate,
+                rustycrates::routes::crates::delete_crate,
+                rustycrates::routes::authorization::login
             ],
         )
-        .attach(rustwebapi::routes::DB::fairing())
-        .attach(rustwebapi::routes::Cache::init())
+        .attach(rustycrates::routes::DB::fairing())
+        .attach(rustycrates::routes::Cache::init())
         .launch()
         .await;
 }

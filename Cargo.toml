@@ -1,5 +1,5 @@
 [package]
-name = "rustwebapi"
+name = "rustycrates"
 default-run = "server"
 version = "0.1.0"
 edition = "2021"
