@@ -79,6 +79,10 @@ impl CrateRepository {
 pub struct UserRepository;
 
 impl UserRepository {
+    pub fn get_by_id(c: &mut PgConnection, id: i32) -> QueryResult<User> {
+        users::table.find(id).get_result(c)
+    }
+
     pub fn get_by_username(conn: &mut PgConnection, username: &String) -> QueryResult<User> {
         users::table
             .filter(users::username.eq(username))
