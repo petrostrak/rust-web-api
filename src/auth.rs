@@ -1,8 +1,8 @@
-use argon2::{
-    password_hash::{Error, PasswordVerifier, SaltString},
-    Argon2, PasswordHash, PasswordHasher,
-};
-use rand::{distributions::Alphanumeric, rngs::OsRng, Rng};
+use argon2::password_hash::{Error, SaltString};
+use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use rand::distributions::Alphanumeric;
+use rand::rngs::OsRng;
+use rand::Rng;
 
 use crate::models::User;
 
@@ -15,7 +15,6 @@ pub struct Credentials {
 pub fn authorize_user(user: &User, credentials: &Credentials) -> Result<String, Error> {
     let db_hash = PasswordHash::new(&user.password)?;
     let argon = Argon2::default();
-
     argon.verify_password(credentials.password.as_bytes(), &db_hash)?;
 
     Ok(rand::thread_rng()
@@ -28,6 +27,6 @@ pub fn authorize_user(user: &User, credentials: &Credentials) -> Result<String, 
 pub fn hash_password(password: String) -> Result<String, Error> {
     let salt = SaltString::generate(OsRng);
     let argon = Argon2::default();
-    let hashed_password = argon.hash_password(password.as_bytes(), &salt)?;
-    Ok(hashed_password.to_string())
+    let password_hash = argon.hash_password(password.as_bytes(), &salt)?;
+    Ok(password_hash.to_string())
 }

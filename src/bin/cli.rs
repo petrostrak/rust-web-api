@@ -4,17 +4,16 @@ extern crate rustwebapi;
 
 fn main() {
     let matches = Command::new("rustwebapi")
-        .version("1.0")
-        .propagate_version(true)
-        .subcommand_required(true)
+        .about("rustwebapi commands")
         .arg_required_else_help(true)
         .subcommand(
             Command::new("users")
-                .about("User administration commands")
+                .about("User management")
                 .arg_required_else_help(true)
                 .subcommand(
                     Command::new("create")
-                        .about("Create a new user")
+                        .about("Create a user with multiple roles attached")
+                        .arg_required_else_help(true)
                         .arg(Arg::new("username").required(true))
                         .arg(Arg::new("password").required(true))
                         .arg(
@@ -24,18 +23,27 @@ fn main() {
                                 .value_delimiter(','),
                         ),
                 )
-                .subcommand(Command::new("list").about("List users"))
+                .subcommand(Command::new("list").about("List all available users"))
                 .subcommand(
-                    Command::new("delete")
-                        .about("Deletes an existing user")
-                        .arg(
-                            Arg::new("id")
-                                .required(true)
-                                .value_parser(clap::value_parser!(i32)),
-                        ),
+                    Command::new("delete").about("Delete user by ID").arg(
+                        Arg::new("id")
+                            .required(true)
+                            .value_parser(clap::value_parser!(i32)),
+                    ),
+                ),
+        )
+        .subcommand(
+            Command::new("digest-send")
+                .about("Send an email with the newest crates")
+                .arg(Arg::new("to").required(true))
+                .arg(
+                    Arg::new("hours_since")
+                        .required(true)
+                        .value_parser(clap::value_parser!(i32)),
                 ),
         )
         .get_matches();
+
     match matches.subcommand() {
         Some(("users", sub_matches)) => match sub_matches.subcommand() {
             Some(("create", sub_matches)) => rustwebapi::commands::create_user(
@@ -59,6 +67,13 @@ fn main() {
             ),
             _ => {}
         },
+        Some(("digest-send", sub_matches)) => rustwebapi::commands::send_digest(
+            sub_matches.get_one::<String>("to").unwrap().to_owned(),
+            sub_matches
+                .get_one::<i32>("hours_since")
+                .unwrap()
+                .to_owned(),
+        ),
         _ => {}
     }
 }
